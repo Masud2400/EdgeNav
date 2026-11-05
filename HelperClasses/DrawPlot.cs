@@ -27,7 +27,7 @@ public class DrawPlot
         visual.Axes.Color(Color.FromHex("#d7d7d7"));
         visual.Grid.MajorLineColor = Color.FromHex("#404040");
         
-        visual.SavePng("line.png", 1300, 800);
+        visual.SavePng("Images/line.png", 1300, 800);
     }
 
     public void DrawGrid(Grid2D grid)
@@ -66,6 +66,6 @@ public class DrawPlot
         visual.Axes.SetLimits(0, width, height, 0);
         visual.Axes.Margins(0, 0);
 
-        visual.SavePng("grid.png", 1300, 800);
+        visual.SavePng("Images/grid.png", 1300, 800);
     }
 }
