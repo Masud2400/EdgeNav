@@ -4,10 +4,12 @@ public class EdgeNav(
     Grid2D grid
 )
 {
-    public int CalculateHeuristic((int x, int y) posOne, (int x, int y) posTwo)
+    public int CalculateDistance((int x, int y) posOne, (int x, int y) posTwo)
     {
-        return (posTwo.x - posOne.x) * 2 + 
-            (posTwo.y - posOne.y) * 2;
+        //Chebyshev Distance
+        int dx = Math.Abs(posTwo.x - posOne.x);
+        int dy = Math.Abs(posTwo.y - posOne.y);
+        return Math.Max(dx, dy);
     }
 
     public List<(float X, float Y)> Lerp(
@@ -101,55 +103,77 @@ public class EdgeNav(
         return obstaclesEdges;
     }
 
-    public List<(int X, int Y)> FindNodes()
+    public Node CreateNode(
+        (int X, int Y) position,
+        int g,
+        int d
+    )
+    {
+        return new Node{
+            position = position,
+            g = g,
+            d = d,
+            f = g + d
+        };
+    }
+
+    public List<Node> FindClosestEdge()
     {
         var obstaclesEdges = FindEdges();
-        List<(int X, int Y)> nodes = [];
+
+        List<Node> nodes = [];
+        var openList = new PriorityQueue<Node, int>();
+
+        int currentDis = CalculateDistance(startPos, endPos);
+        Node currentNode = CreateNode(
+            startPos, 0, currentDis
+        );
+        nodes.Add(currentNode);
 
         foreach(var kvp in obstaclesEdges)
         {
-            var closestEdge = kvp.Value[0];
-            int dis = int.MaxValue;
-
             foreach(var val in kvp.Value)
             {
-                int h = CalculateHeuristic(val, endPos);
-
-                if(h < dis)
-                {
-                    closestEdge = val;
-                    dis = h;
-                }
+                int tentativeG = currentNode.g + 
+                    CalculateDistance(currentNode.position, val);
+                currentDis = CalculateDistance(val, endPos);
+                Node nextNode = CreateNode(
+                    val, tentativeG, currentDis
+                );
+                openList.Enqueue(nextNode, nextNode.f);
             }
 
-            nodes.Add(closestEdge);
+            currentNode = openList.Dequeue();
+            nodes.Add(currentNode);
         }
 
+        nodes.Add(CreateNode(endPos, 0, 0));
         return nodes;        
     }
-
+    
     public List<(float X, float Y)> ConnectNodes()
     {
-        var nodes = FindNodes();
+        var nodes = FindClosestEdge();
 
         var path = new List<(float X, float Y)>();
 
-        var increments = Lerp(startPos, nodes[0]);
+        var increments = Lerp(startPos, nodes[0].position);
         path.AddRange(increments);
 
-        var currentNode = nodes[0];
+        var currentNode = nodes[0].position;
 
         foreach(var node in nodes)
         {
-            if(node == currentNode)
+            var nodePos = node.position;
+            if(nodePos == currentNode)
                 continue;
 
-            increments = Lerp(currentNode, node);
-            currentNode = node;
+            increments = Lerp(currentNode, nodePos);
+            currentNode = nodePos;
             path.AddRange(increments);
         }
 
-        increments = Lerp(nodes[^1], endPos);
+        increments = Lerp(nodes[^1].position, endPos);
         path.AddRange(increments);
 
         return path;
