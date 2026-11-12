@@ -125,30 +125,40 @@ public class EdgeNav(
         var openList = new PriorityQueue<Node, int>();
 
         int currentDis = CalculateDistance(startPos, endPos);
+
         Node currentNode = CreateNode(
             startPos, 0, currentDis
         );
+
         nodes.Add(currentNode);
 
-        foreach(var kvp in obstaclesEdges)
+        foreach (var kvp in obstaclesEdges)
         {
-            foreach(var val in kvp.Value)
+            foreach (var val in kvp.Value)
             {
-                int tentativeG = currentNode.g + 
+                int tentativeG = currentNode.g +
                     CalculateDistance(currentNode.position, val);
+
                 currentDis = CalculateDistance(val, endPos);
+
                 Node nextNode = CreateNode(
                     val, tentativeG, currentDis
                 );
+
                 openList.Enqueue(nextNode, nextNode.f);
             }
 
-            currentNode = openList.Dequeue();
-            nodes.Add(currentNode);
+            if (openList.Count > 0)
+            {
+                currentNode = openList.Dequeue();
+                nodes.Add(currentNode);
+            }
+
+            openList.Clear();
         }
 
         nodes.Add(CreateNode(endPos, 0, 0));
-        return nodes;        
+        return nodes;
     }
     
     public List<(float X, float Y)> ConnectNodes()

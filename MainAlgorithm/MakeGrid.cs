@@ -13,20 +13,21 @@ public class MakeGrid(int row, int col)
         }
     }
 
-    public Grid2D SetObstacles( 
-        int rowStart, 
-        int rowLen,
-        int colStart,
-        int colEnd
-    )
+    public Grid2D SetObstacles(Dictionary<string, List<int>> obstacles)
     {
         Generate();
         
-        for(int y = rowStart; y < rowLen; y++)
+        foreach(var kvp in obstacles)
         {
-            for(int x = colStart; x < colEnd; x++)
+            if(kvp.Value is [var num1, var num2, var num3, var num4])
             {
-                grid.SetValue(x, y, 1);
+                for(int y = num1; y < num2; y++)
+                {
+                    for(int x = num3; x < num4; x++)
+                    {
+                        grid.SetValue(x, y, 1);
+                    }
+                }
             }
         }
 
